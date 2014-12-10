@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% set title = 'Workspace' %}
+
+{% block nav %}
+	<ul class="nav">
+		<li><a href="/workspaces">Workspaces</a>
+		{% for crumb in breadcrumbs %}
+			<li><a href="{{ crumb.href }}">{{ crumb.text }}</a></li>
+		{% endfor %}
+	</ul>
+{% endblock %}
+
+{% block pagetitle %}
+	<div class="pagetitle">
+		{% if workspace.handle %}
+			<h1>{{ workspace.title }}</h1>
+		{% else %}
+			<h1>Import Workspaces</h1>
+		{% endif %}
+	</div>
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+	<form method="post">
+		<table class="table">
+			<tr>
+				<th>
+					Workspaces Data
+					<div class="muted">Required</div>
+				</th>
+				<td>
+          <textarea name="workspaces_data"></textarea>
+					<div class="description">
+            Raw JSON representation of workspaces
+					</div>
+				</td>
+			</tr>
+
+		</table>
+
+		<button class="btn btn-primary btn-large permission-administrator">
+			<i class="icon-upload icon-white"></i>
+			Import
+		</button>
+	</form>
+</div>
+
+{% endblock %}
+
+{% block footer_js %}
+	<script>
+		new Showcase.Form.Input.Pair({
+			source: document.querySelector('input[name=title]'),
+			target: document.querySelector('input[name=handle]')
+		});
+	</script>
+{% endblock %}

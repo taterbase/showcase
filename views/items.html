@@ -18,6 +18,8 @@
 			<ul class="dropdown-menu">
 				<li><a class="permission-editor" href="/workspaces/{{ workspace.handle }}/collections/{{ collection.id }}/edit">Configure Collection</a></li>
 				<li><a href="/workspaces/{{ workspace.handle }}/api/#{{ collection.name }}">REST API</a></li>
+				<li><a class="permission-editor" href="/workspaces/{{ workspace.handle }}/collections/{{ collection.id }}/export">Export Collection</a></li>
+				<li><a class="permission-editor" href="/workspaces/{{ workspace.handle }}/collections/{{ collection.id }}/import">Import Collection</a></li>
 			</ul>
 		</div>
 		<a class="btn btn-darker permission-editor" href="/workspaces/{{ workspace.handle }}/collections/{{ collection.id }}/items/new">
