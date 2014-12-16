@@ -12,6 +12,7 @@
   "dependencies": {
     "armrest": "2.1.2",
     "async": "0.2.9",
+    "async-series": "0.0.1",
     "config": "~0.4.35",
     "connect-domain": "0.5.0",
     "connect-flash": "0.1.1",
@@ -19,6 +20,7 @@
     "dreamer": "https://github.com/dchester/dreamer/archive/v1.0.5.tar.gz",
     "each-async": "^1.1.0",
     "express": "3.4.7",
+    "garr": "^2.0.0",
     "gnode": "0.0.8",
     "gx": "https://github.com/dchester/gx/archive/v0.1.0.tar.gz",
     "lodash.find": "^2.4.1",

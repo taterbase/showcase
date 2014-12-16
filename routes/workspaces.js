@@ -1,7 +1,9 @@
 var gx = require('gx');
 var find = require('lodash.find')
+var Workspace = require('../lib/workspace')
 var Collection = require('../lib/collection')
 var Item = require('../lib/item')
+var ItemData = require('../lib/item-data')
 var File = require('../lib/file')
 var fs = require('fs')
 var each = require('each-async')
@@ -11,8 +13,6 @@ var yauzl = require('yauzl')
 var uuid = require('node-uuid')
 var mkdirp = require('mkdirp')
 var dirName = require('path').dirname
-
-var read = gx.gentrify(fs.readFile)
 
 exports.initialize = function(app) {
 
@@ -53,6 +53,8 @@ exports.initialize = function(app) {
 
   app.post('/workspaces/import', requireSuperuser, function(req, res) {
     var importDir = tmp_storage_path + '/showcase-import-' + uuid.v1()
+    var numOfFiles = 0;
+
     yauzl.open(req.files["import-file"].path, function(err, zipfile) {
       if (err) {
         console.log(err)
@@ -61,6 +63,8 @@ exports.initialize = function(app) {
 
       zipfile.on('entry', function(entry) {
         var destination = importDir + '/' + entry.fileName
+
+        numOfFiles++
 
         zipfile.openReadStream(entry, function(err, readStream) {
           if (err) {
@@ -71,14 +75,35 @@ exports.initialize = function(app) {
             if (err)
               console.log(err)
 
-            console.log(destination)
-            readStream.pipe(fs.createWriteStream(destination))
+            var writeStream = fs.createWriteStream(destination)
+
+            writeStream.on('finish', function() {
+              numOfFiles--
+              if (numOfFiles === 0) {
+                fs.readFile(importDir + '/data.json', 'utf8', function(err, data) {
+                  var data = JSON.parse(data)
+                  var options = {data: data, importDir: importDir}
+
+                  gx(function*() {
+                    //yield Workspace.import(options)
+                    //console.log("did some workspaces")
+                    yield* Collection.import(options)
+                    //console.log("did some collections")
+                    //yield Item.import(options)
+                    //console.log("did some items")
+                  })
+                })
+              }
+            })
+
+            readStream.pipe(writeStream)
           })
         })
       })
 
-      zipfile.once('end', function() {
-        res.send("ay good job dawg")
+      zipfile.on('end', function() {
+        console.log("SUP")
+        res.send('good on ya')
       })
     })
   })
@@ -113,6 +138,13 @@ exports.initialize = function(app) {
     })
 
     result.items = yield Item.all({collection_id: {in: collection_ids}})
+    var item_ids = result.items.map(function(item) { return item.id })
+
+    var item_datas = yield models.item_data.findAll({}).complete(gx.resume)
+    result.items.forEach(function(item) {
+      var user_id = find(item_datas, {item_id: item.id}).user_id
+      item.user_id = user_id
+    })
 
     var images = result.items.map(function(item) {
       var images = []
@@ -127,7 +159,7 @@ exports.initialize = function(app) {
       return images
     }).reduce(function(prev, curr) {
       return prev.concat(curr)
-    })
+    }, [])
 
     each(images, function(image, index, done) {
       File.load({id: image.file_id}, function(err, imageData) {
